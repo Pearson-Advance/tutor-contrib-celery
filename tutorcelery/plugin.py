@@ -45,7 +45,6 @@ def _add_core_autoscaling_config(
     return scaling_config
 
 
-@tutor.hooks.lru_cache
 def get_celery_workers_config() -> dict[str, dict[str, CELERY_WORKERS_ATTRS_TYPE]]:
     """
     This function is cached for performance.
