@@ -10,7 +10,7 @@ lead to unexpected behaviors when running large-scale sites.
 ## Installation
 
 ```shell
-pip install git+https://github.com/eduNEXT/tutor-contrib-celery
+pip install tutor-contrib-celery
 ```
 
 ## Usage
@@ -79,6 +79,24 @@ CELERY_CMS_EXPLICIT_QUEUES:
     queue: edx.cms.core.high
 ```
 
+### Custom parameters
+
+Each deployment can be configured to run with different paramaters to override the defaults, the setting `extra_param`
+is a list that can be used to pass custom parameters to the Celery workers. e.g changing the Celery's pool parameter
+for the high_mem lms worker deployment:
+
+```python
+@CELERY_WORKERS_CONFIG.add()
+def _add_celery_workers_config(workers_config):
+    # Adding LMS extra queues
+    workers_config["lms"]["high_mem"]["extra_params"] = {
+      "--pool=gevent",
+      "--concurrency=100",
+    }
+
+    return workers_config
+```
+
 ### Autoscaling
 
 As an alternative to the CPU/memory based autoscaling offered by the plugin [tutor-contrib-pod-autoscaling](https://github.com/eduNEXT/tutor-contrib-pod-autoscaling),
@@ -98,6 +116,7 @@ To enable autoscaling you need to enable the `enable_keda` key for every queue v
 
 > [!NOTE]
 > You can use the filter `CELERY_WORKERS_CONFIG` as shown above to modify the scaling parameters for every queue.
+> This has been test against Keda v2.15.0 and above.
 
 If you are using [tutor-contrib-pod-autoscaling](https://github.com/eduNEXT/tutor-contrib-pod-autoscaling) and want to setup Keda autoscaling, make sure to disable HPA for the `lms-worker` and the `cms-worker` as **using both autoscalers at the same time is not recommended**.
 
